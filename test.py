@@ -25,8 +25,6 @@ def parse_para():
                             help = "The number of banks")
 
     parser.add_option("-i", dest = "N0",
-                            type = "int", 
-                            default = 1,
                             action = 'store',
                help = "nodes connected every step, default is 1")
     
@@ -41,32 +39,41 @@ def parse_para():
     
     parser.add_option( "--lamuta", dest = "LAMUTA",
                                action = 'store',
-                               default = 0,
                          help = 'Banks\' initial property')
+
+    parser.add_option("--loop", dest = "MAX_LOOP_TIMES",
+                               action = 'store',
+                               type = 'int',
+                         help = 'maximum times the loop does')
 
     (options, args) = parser.parse_args()
     
     if not options.BANK_NUM:
-      print >> sys.stderr, 'ERROR : total number is not given!\n'
-      parser.print_help()
-      sys.exit(1)
-    else:
-      n = int(options.BANK_NUM)
+      parser.error('total number is not given')
 
     if not options.N0:
       print >> sys.stderr, 'WARNING : step number is not given, set as 1'      
-      n0 = 1
+      options.N0 = 1
  
-    if options.N0 > n:
+    if options.N0 > options.BANK_NUM:
       print >> sys.stderr, 'WARNING : step number too large, set as 1'
-      n0 = 1   
-  
+      options.N0 = 1
+ 
     if not options.LAMUTA:
-      print >> sys.stderr, 'WARNING : lamuta is not given, set as 0'
+      print >> sys.stderr, 'WARNING : lamuta is not given, set as 0.6'
+      options.LAMUTA = 0.6
+ 
+    if not options.MAX_LOOP_TIMES:
+      print >> sys.stderr, 'WARNING : max loop times is not given, set as 10'
+      options.MAX_LOOP_TIMES = 10
 
-    if options.BANK_CHOSEN_NUM:
+    if options.BANK_CHOSEN_NUM and options.verbose:
+      parser.error('options -m and --manual are mutually exclusive')
+    
+    elif options.BANK_CHOSEN_NUM:
       m = int(options.BANK_CHOSEN_NUM)
-      m_list = get_random_list(n,m)
+      m_list = get_random_list(int(options.BANK_NUM),m)
+    
     elif options.verbose:
       loop = True
       while(loop):
@@ -84,11 +91,13 @@ def parse_para():
         if len(m_list)  > n:
             print >> sys.stderr, 'number of numbers is larger than population!'
             loop = True
+    
     else:
-      parser.print_help()
-      sys.exit(1)
+      parser.error('You must give a methon to choose aimed banks')
 
-    lamuta = int(options.LAMUTA)
+    n = int(options.BANK_NUM)
+    n0 = int(options.N0)
+    lamuta = float(options.LAMUTA)
     c_list  = n * [lamuta]
     S_init_list = n * [0]
     max_loop_times = range(20)
@@ -103,6 +112,9 @@ def main(n, n0, m_list, c_list, S_init_list, max_loop_times):
     myBA = init_myBA(n,n0,c_list,S_init_list)
     ST = init_ST(n) 
     
+    last1 = 0
+    last2 = 0
+    last3 = 0
     for time in max_loop_times:
       if time == 0:
         set_nodes_S(myBA,m_list)
