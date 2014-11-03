@@ -4,7 +4,6 @@ import sys
 import os 
 import signal
 import time
-import matplotlib.pyplot as plt
 from optparse import OptionParser
 from static_struct import *
 #from static_vars import *
