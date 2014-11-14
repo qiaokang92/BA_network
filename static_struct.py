@@ -58,7 +58,7 @@ def init_edges_attr_e(G):
       to = i[1]
       to_in = G.in_degree(to)
       if (to_in): 
-        G.edge[first][to][0]['e'] = 0.2 /to_in 
+        G.edge[first][to][0]['e'] = 0.2 / to_in 
         #print i
         #print first_in
         #print G.edge[first][to][0]   
@@ -73,7 +73,7 @@ def init_nodes_LB(G):
           result += get_edge_attr(G,j)['e']
         if i == j[1]:
           result2 += get_edge_attr(G,j)['e']
-      G.node[i]['L'] = result2
+      G.node[i]['L'] = 0.2
       G.node[i]['B'] = result
 
 #  init the 'c' and 'S' value of all nodes in G
@@ -107,7 +107,9 @@ def update_nodes_status(G):
         G.node[i]['status'] = 'Default'
 
 def update_impact_between_nodes(G,ST):
+    #print 'update s'
     for i in G.edges():
+      #print i
       first = i[1]
       end = i[0]
       last_c = G.node[first]['c']
@@ -122,8 +124,7 @@ def update_impact_between_nodes(G,ST):
       elif last_S - last_c >= last_B:
         ST.edge[first][end][0]['shock'] = last_E
       else:
-        ST.edge[first][end][0]['shock'] = (last_S - last_c) * last_E / L
-
+        ST.edge[first][end][0]['shock'] = (last_S - last_c) * last_E / 0.2
 # update the impact from i node to j node in G
 # by the change of status and 'c' value
 def update_impact_between_nodes2(G,ST):
@@ -147,12 +148,11 @@ def update_impact_between_nodes2(G,ST):
   
 # calculate the 'S' value of all nodes in G
 # by the change of 's' value of edges in ST  
-def udpate_nodes_S(G,ST):
-    n = len(G)
+def update_nodes_S(G,ST):
     for i in G.nodes():
       G.node[i]['S'] = 0
       for j in ST.nodes():
-        if i != j:
+        if j!=i:
           G.node[i]['S'] += ST.edge[j][i][0]['shock']
 
 # set the 'S' value of node in G as 1
@@ -212,9 +212,27 @@ def get_max_degree_nodes(G, m):
           degree_list[j],degree_list[j-1] = degree_list[j-1],degree_list[j]
 
     for i in range(0,n):
+      #print 'node %d, degree: %d' %(degree_list[i]['num'], degree_list[i]['degree'])
       m_list.append(degree_list[i]['num'])
     return m_list[0:m]
 
+def get_min_degree_nodes(G, m):
+    degree_list = []
+    m_list = []
+    n = G.number_of_nodes()
+    for i in G.nodes():
+      degree_list.append({'num':i,'degree':G.degree(i)})
+    #print degree_list
+
+    for i in range(0,n):
+      for j in range(1, n):
+        if degree_list[j-1]['degree'] > degree_list[j]['degree']:
+          degree_list[j],degree_list[j-1] = degree_list[j-1],degree_list[j]
+
+    for i in range(0,n):
+      #print 'node %d, degree: %d' %(degree_list[i]['num'], degree_list[i]['degree'])
+      m_list.append(degree_list[i]['num'])
+    return m_list[0:m]
 
 def get_max_indegree_nodes(G, m):
     degree_list = []
@@ -251,24 +269,6 @@ def get_max_outdegree_nodes(G, m):
       m_list.append(degree_list[i]['num'])
     return m_list[0:m]
 
-
-def get_min_degree_nodes(G, m):
-    degree_list = []
-    m_list = []
-    n = G.number_of_nodes()
-    for i in G.nodes():
-      degree_list.append({'num':i,'degree':G.degree(i)})
-    #print degree_list
-
-    for i in range(0,n):
-      for j in range(1, n):
-        if degree_list[j-1]['degree'] > degree_list[j]['degree']:
-          degree_list[j],degree_list[j-1] = degree_list[j-1],degree_list[j]
-
-    for i in range(0,n):
-      m_list.append(degree_list[i]['num'])
-    return m_list[0:m]
-
 def get_average_degree(G):
     num = G.number_of_nodes() 
     total = 0
@@ -276,8 +276,12 @@ def get_average_degree(G):
         total += G.degree(i)
     return total/num
 
-
-
+def get_nodes_in_degree(G):
+    result = []
+    n = G.number_of_nodes()
+    for i in range(0, n):
+        result.append({'node':i, 'indegree':G.in_degree(i)})
+    return result 
 
 
 

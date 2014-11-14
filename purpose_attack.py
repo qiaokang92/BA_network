@@ -7,8 +7,10 @@ import sys
 from optparse import OptionParser
 
 def init_purpose_list(G, m, degree):
+    n = G.number_of_nodes()
     if degree == 'all':
-      return get_min_degree_nodes(G, m)
+      #return get_random_list(n,m)
+      return get_max_degree_nodes(G, m)
     elif degree == 'in':
       return get_max_indegree_nodes(G, m)
     elif degree == 'out':
@@ -19,6 +21,7 @@ def do_one_purpose_attack(n,n0,m,c_list,s_init_list,degree):
     
     myBA = build_myBA(n, n0)
     ST = build_ST(n)
+    #print get_nodes_in_degree(myBA)
     print 'Average degree: %d' % (get_average_degree(myBA))
 
     for i in range(1, m+1):
@@ -35,7 +38,7 @@ def do_one_purpose_attack(n,n0,m,c_list,s_init_list,degree):
 
 def do_purpose_attack(n, n0, m, c_list, s_init_list, degree):
     all_result = []
-    for i in range(1,3):
+    for i in range(1,11):
       all_result.append(do_one_purpose_attack(n, n0, m, c_list, s_init_list, degree))
     print all_result
     

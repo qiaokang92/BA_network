@@ -111,24 +111,22 @@ def self_test(n, n0, m, c_list, s_init_list):
     print 'Test finish, default banks: %d' % (one_loop(myBA, ST, m_list))
 
 def one_loop(myBA, ST, m_list):
+
     last_c = get_nodes_attr_c(myBA)
-    
+
     for i in range(1000):
       if i == 0:
         set_nodes_S(myBA, m_list)
+      else:
+        update_nodes_S(myBA,ST)
       update_nodes_status(myBA)
-      #print 'update status finish'
       update_impact_between_nodes(myBA,ST)
-      #print 'update s finish'
-      udpate_nodes_S(myBA,ST)
-      #print 'update S finish'
       
       this_c = get_nodes_attr_c(myBA)
       if (this_c == last_c):
         break
       last_c = this_c
-      #print 'test c finish'
-      
+    
     default_num = get_default_num(myBA)
     return default_num
 
