@@ -48,7 +48,7 @@ def get_nodes_attr_c(G):
     result = []
     for i in G.nodes():
       show = G.node[i]
-      result.append(show['c'])
+      result.append(round(show['c'], 2))
     return result
 
 # init the 'e' value of all edges in G 
@@ -81,7 +81,9 @@ def init_nodes_LB(G):
 def init_nodes_CS(G,c,s):
     for i in G.nodes():
       G.node[i]['c'] = c[i]
+      #print i 
       G.node[i]['S'] = s[i]
+      #print i
 
 # init the 'statue' value as 'Stable' of all nodes in G
 def init_nodes_status(G):

@@ -1,10 +1,8 @@
 import matplotlib.pyplot as plt
 import cPickle
-import test
 import main
 from static_struct import *
 import sys
-from optparse import OptionParser
 
 def init_purpose_list(G, m, degree):
     n = G.number_of_nodes()
@@ -38,7 +36,7 @@ def do_one_purpose_attack(n,n0,m,c_list,s_init_list,degree):
 
 def do_purpose_attack(n, n0, m, c_list, s_init_list, degree):
     all_result = []
-    for i in range(1,11):
+    for i in range(1,21):
       all_result.append(do_one_purpose_attack(n, n0, m, c_list, s_init_list, degree))
     print all_result
     
@@ -50,11 +48,9 @@ def do_purpose_attack(n, n0, m, c_list, s_init_list, degree):
     index = range(1, m + 1)
     draw(index, ave)
      
-    '''
     fd = open('./test', 'w')
     fd.write(str(all_result))
     return all_result
-    '''
 
 def get_average_list(result):
     groups = len(result)

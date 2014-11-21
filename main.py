@@ -6,6 +6,7 @@ import time
 from optparse import OptionParser
 from static_struct import *
 from  purpose_attack import *
+from random_attack import *
 
 def signal_handler(signal, frame):
     print '\nProgram Exit'
@@ -124,6 +125,7 @@ def one_loop(myBA, ST, m_list):
       
       this_c = get_nodes_attr_c(myBA)
       if (this_c == last_c):
+        #print this_c
         break
       last_c = this_c
     
