@@ -48,7 +48,7 @@ def get_nodes_attr_c(G):
     result = []
     for i in G.nodes():
       show = G.node[i]
-      result.append(round(show['c'], 2))
+      result.append(round(show['c'], 3))
     return result
 
 # init the 'e' value of all edges in G 
