@@ -16,6 +16,16 @@ def self_test(opts):
     
     m_list = get_random_list(n, m)
     print 'These banks will be attacked: %s' % (str(m_list))
+    
     print 'Test finish, default banks: %d' % (one_loop(myBA, ST, m_list))
+
+    myBA = init_myBA(myBA, c_list, s_init_list)
+    ST = init_ST(ST)
+    print 'Test finish, default banks: %d' % (another_loop(myBA, ST, m_list))
+    
+    myBA = init_myBA(myBA, c_list, s_init_list)
+    ST = init_ST(ST)
+    print 'Test finish, default banks: %d' % (one_loop(myBA, ST, m_list))
+    #print 'Test finish, default banks: %d' % (one_loop(myBA, ST, m_list))
 
 

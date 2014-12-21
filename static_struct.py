@@ -5,8 +5,13 @@ The first graph G is a graph of banks, the second one includes the strike betwee
 Author: Kang Qiao, BUAA
 Finsh Date: Oct, 25th, 2014
 '''
+
 import random
 import networkx as nx
+from networkx.generators.classic import empty_graph, path_graph, complete_graph
+import math
+import itertools
+import sys
 
 '''
 build a BA network, with n nodes and each step connet m nodes
@@ -15,7 +20,75 @@ modified from barabasi_albert_graph() in networkx.random_graphs module
 '''
 
 def build_network(n,m):
-    return nx.random_graphs.my_BA_graph(n,m)
+    #return nx.random_graphs.my_BA_graph(n,m)
+    return local_my_BA_graph(n,m)
+
+def local_my_BA_graph(n,m,seed=None):
+    if m < 1 or  m >=n:
+        raise nx.NetworkXError(\
+              "Barabasi-Albert network must have m>=1 and m<n, m=%d,n=%d"%(m,n))
+    if seed is not None:
+        random.seed(seed)
+
+    # Add m initial nodes (m0 in barabasi-speak)
+    G=empty_graph(m,create_using=nx.MultiDiGraph())
+    G.name="my BA graph, directed and muliple(%s,%s)"%(n,m)
+    # Target nodes for new edges
+    targets=list(range(m))
+    # List of existing nodes, with nodes repeated once for each adjacent edge
+    repeated_nodes=[]
+
+    # make G a full graph
+    for i in targets:
+        for j in targets:
+            if (i != j) and (not (i,j) in G.edges()):
+                G.add_edge(i,j)
+                repeated_nodes.append(i)
+                repeated_nodes.append(j)
+    
+    # Start adding the other n-m nodes. The first node is m.
+    source=m
+    counter=0
+    while source<n:
+        # Add edges to m nodes from the source.
+        targets = [i for i in targets]
+        for i in range(0, m): 
+            if counter % 3 == 0:
+                G.add_edge(source, targets[i])
+                repeated_nodes.append(targets[i])
+                repeated_nodes.append(source)
+            elif counter % 3 == 1:
+                G.add_edge(targets[i], source)
+                repeated_nodes.append(targets[i])
+                repeated_nodes.append(source)
+            else:
+                G.add_edge(source, targets[i])
+                G.add_edge(targets[i], source)
+                repeated_nodes.extend([targets[i]]*2)
+                repeated_nodes.extend([source]*2)
+            counter += 1
+        '''
+        if counter % 3 == 0:
+          G.add_edges_from(zip([source]*m,targets))
+        elif counter % 3 == 1:
+          G.add_edges_from(zip(targets,[source]*m))
+        else:
+          G.add_edges_from(zip(targets,[source]*m))
+          G.add_edges_from(zip([source]*m,targets))
+        '''
+        # Add one node to the list for each new edge just created.
+        #repeated_nodes.extend(targets)
+        # And the new node "source" has m edges to add to the list.
+        #repeated_nodes.extend([source]*m)
+        # Now choose m unique nodes from the existing nodes
+        # Pick uniformly from repeated_nodes (preferential attachement)
+        targets = nx.random_graphs._random_subset(repeated_nodes,m)
+        source += 1
+    #print '1111'
+    #print G.nodes()
+    #print G.number_of_nodes()
+    return G
+
 
 # return attributes of every edges in G
 def get_edges_attr(G):
@@ -44,11 +117,11 @@ def get_nodes_attr(G):
       result.append(show)
     return result
 
-def get_nodes_attr_c(G):
+def get_nodes_attr_c(G, precise):
     result = []
     for i in G.nodes():
       show = G.node[i]
-      result.append(round(show['c'], 3))
+      result.append(round(show['c'], precise))
     return result
 
 # init the 'e' value of all edges in G 
@@ -99,14 +172,33 @@ def init_impact_between_nodes(ST):
 
 # update the status and the 'c' value of every node in G
 # by the change of 'S' value
-def update_nodes_status(G):
+def update_nodes_status(G, g):
     for i in G.nodes():
-      if G.node[i]['c'] > G.node[i]['S']:
-        G.node[i]['c'] -= G.node[i]['S']
+      c = G.node[i]['c']
+      S = G.node[i]['S'] 
+      if c > S:
+        G.node[i]['c'] -= S
         G.node[i]['status'] = 'Stable'
-      else:
+      elif (c != 0) & (c <= S):
         G.node[i]['c'] = 0
         G.node[i]['status'] = 'Default'
+        for j in g.node[i]['neibor']:
+            g.node[j]['ndn'] += 1
+    
+def update_nodes_c(BA,g):
+    for i in g.nodes():
+        rho = get_node_rho(g, i)
+        old_c = BA.node[i]['c']
+        BA.node[i]['c'] *= math.exp((rho - 1) * 1) 
+        #if old_c != 0:
+            #print BA.node[i]['c'] / old_c
+        #print 'new c is %s' % (BA.node[i]['c'])
+
+def get_node_rho(g, node):
+    neibor_num = len(g.node[node]['neibor'])
+    nndn = float(neibor_num - g.node[node]['ndn'])
+    #nndn = float(g.node[node]['ndn'])
+    return nndn / neibor_num
 
 def update_impact_between_nodes(G,ST):
     #print 'update s'
@@ -285,6 +377,109 @@ def get_nodes_in_degree(G):
         result.append({'node':i, 'indegree':G.in_degree(i)})
     return result 
 
+#convert a mutidigraph to a undirected graph (with no parallel edges)
+def multidi_to_graph(G):
+    edges = G.edges()
+    for one in edges:
+        rev = (one[1],one[0])
+        if rev in edges:
+            edges.remove(rev)
+    edges = list(set(edges))
+    G1 = nx.Graph()
+    G1.add_edges_from(edges)
+    return G1
+
+def get_neighbor_nodes(G, node):
+    result = []
+    for i in G.edges():
+        if node == i[0]:
+            result.append(i[1])
+        elif node == i[1]:
+            result.append(i[0])
+    return result
+
+# G is an undirected graph, add its nodes until its average degree comes to d 
+def add_edges(G, m, d):
+    if d >= G.number_of_nodes():
+        print 'unreachable degree given!'
+        sys.exit(1)
+
+    for i in G.nodes():
+        G.node[i]['dirty'] = 0
+    n = G.number_of_nodes()
+    repeated = []
+    source = 0
+
+    for i in G.edges():
+        nodes = [i[0], i[1]]
+        repeated.extend(nodes)
+
+    while (get_average_degree(G) < d):
+        if source == n:
+            source = 0
+        neibor = get_neighbor_nodes(G, source)
+        exclude = neibor.append(source)
+        new = repeated[:]
+        
+        for i in neibor:
+            while(i in new):
+                new.remove(i)
+                
+        flag = False
+        if len(set(new)) <= m:
+            #print 'this node is too big!'
+            G.node[source]['dirty'] = 1
+            for i in G.nodes():
+                if G.node[i]['dirty'] == 0:
+                    flag = True
+            if flag == False:
+                print 'FAIL to add nodes, too big degree'
+                print 'largest degree is %d' % (get_average_degree(G))
+                #print G.edges()
+                sys.exit(4)
+            source += 1
+            continue
+        #print new  
+        targets = nx.random_graphs._random_subset(new, m)
+
+        edges = zip([source]*m, targets)
+       
+        G.add_edges_from(edges)
+        #print 'these edges are added: %s' % (edges)
+        
+        repeated.extend([source]*m)
+        repeated.extend(targets)
+        source += 1
+
+def build_myG(myBA, n0, d):
+    myG = multidi_to_graph(myBA)
+    add_edges(myG, n0, d)
+    
+    for i in myG.nodes():
+        myG.node[i]['neibor'] = get_neighbor_nodes(myG, i)
+    return myG
+
+def init_myG(G):
+    for i in G.nodes():
+        G.node[i]['ndn'] = 0
+
+if __name__ == '__main__':
+    G = build_network(30,4)
+    print 'number of edges of G is %d' % (G.number_of_edges())
+    #print G.edges()
+    print 'average degree is %d' % (get_average_degree(G))
+    
+    G1 = multidi_to_graph(G)
+    print 'number of edges of G is %d' % (G1.number_of_edges())
+    #print G1.edges()
+    print 'average degree is %d' % (get_average_degree(G1))
+
+    add_edges(G1, 4, 15)
+    print 'number of edges of G is %d' % (G1.number_of_edges())
+    #print G1.edges()
+    print 'average degree is %d' % (get_average_degree(G1))
+        
+    
 
 
 

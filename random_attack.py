@@ -4,7 +4,9 @@ from static_struct import *
 from invoke import *
 
 def do_random_attack(opts):
-    all_result = []
+    data = []
+    all_result1 = []
+    all_result2 = []
     #get needed options:
     num_graph = opts.num_graph
     figure_kind = opts.figure_kind
@@ -13,54 +15,65 @@ def do_random_attack(opts):
     print ('\n %d graphs will be tested') % (num_graph)
     for i in range(1, num_graph + 1):
         print '\nThe %dth graph will be established' % (i)
-        all_result.append(do_one_random_attack(opts))
-    print all_result
-    
-    draw_figure(all_result,figure_kind)
+        myBA, ST, myG = gen_graphs(opts)
+        if opts.action == 'no':
+            all_result1.append(do_one_random_attack(myBA, ST, myG, opts, False))
+        elif opts.action =='info':
+            all_result1.append(do_one_random_attack(myBA, ST, myG, opts, True))
+        elif opts.action == 'no+info':
+            all_result1.append(do_one_random_attack(myBA, ST, myG, opts, False))
+            all_result2.append(do_one_random_attack(myBA, ST, myG, opts, True))
+        #all_result2
+    #print all_result
+    data = [all_result1, all_result2]
+    parse_figure(data, figure_kind)
 
-    fd = open('./result/random', 'w')
-    fd.write(str(all_result))
-    
-    '''
-    #[todo]the algorithm to get average result is complicated
-    ave1 = get_average_list_1(all_result)
-    #print ave1
-    ave2 = get_average_list_2(ave1)
-    #print ave2
+def parse_figure(data, figure_kind):
+    if len(data[1]) == 0:
+        draw_figure(data[0], figure_kind, '-')
+    else:
+        draw_figure(data[0], figure_kind, '-')
+        draw_figure(data[1], figure_kind, '--')
+    plt.show()
 
-    index = range(1, m+1)
-    draw(index, ave2)
-    return all_result
-    '''
-
-def do_one_random_attack(opts):
-    #get needed opts
+def gen_graphs(opts):
     n = opts.bank_number
     n0 = opts.step
-    m = opts.attack_number
-    t = opts.random_times
-    c_list = get_c_list(opts.bank_number, opts.lamuta )
-    s_init_list = n * [0]
-    
-    result = []
-    one_result = []
 
     myBA = build_myBA(n, n0)
     ST = build_ST(n)
-
+    myG = build_myG(myBA, n0, 12)
     print '\nNew graph established, number of nodes: %d' % (n)
     print 'Average degree: %d' % (get_average_degree(myBA))
+    return myBA, ST, myG
+
+def init_graphs(opts, myBA, ST, myG):
+    n = opts.bank_number
+    c_list = get_c_list(opts.bank_number, opts.lamuta )
+    s_init_list = n * [0]
+    
+    init_myBA(myBA, c_list, s_init_list)
+    init_ST(ST)
+    init_myG(myG)
+
+def do_one_random_attack(myBA, ST, myG, opts, kind):
+    #get needed opts
+    n = opts.bank_number
+    m = opts.attack_number
+    t = opts.random_times
+    
+    result = []
+    one_result = []
 
     print '%d times attack will be executed' % (t)
     for i in range(1, t+1):
         result = []
         print '\nThis is %dth attack' % (i) 
-        print 'we will attack from 1 to %d banks' % (m)
+        print 'we will attack from 1 to %d banks\n' % (m)
         for j in range(1, m+1):
             m_list = get_random_list(n, j)
-            myBA = init_myBA(myBA, c_list, s_init_list)
-            ST = init_ST(ST)
-            num = one_loop(myBA, ST, m_list)
+            init_graphs(opts, myBA, ST, myG)
+            num = one_loop(myBA, ST, myG, m_list, kind)
             print '%d random attack in %d banks caused %d default banks' % (j,n,num)
             result.append(num)
             #print result
@@ -107,7 +120,7 @@ def get_simple_result(result):
             simple += result[i][j]
     return simple
 
-def draw_figure(result, kind):
+def draw_figure(result, kind, line):
     groups = len(result)
     times = len(result[0])
     lens = len(result[0][0])
@@ -116,22 +129,22 @@ def draw_figure(result, kind):
       ave1 = get_average_list_1(result)
       ave = get_average_list_2(ave1)
       index = range(1, lens+1)
-      plt.plot(index, ave)
-      plt.show()
+      plt.plot(index, ave, line)
+      #plt.show()
     
     elif kind == 'lines':
       index = range(1, lens+1)
       for i in range(0, groups):
         for j in range(0, times):
-          plt.plot(index, result[i][j])
-      plt.show()
+          plt.plot(index, result[i][j], line)
+      #plt.show()
 
     elif kind == 'points':
       index = range(1, lens+1)
       for i in range(0, groups):
         for j in range(0, times):
-          plt.plot(index, result[i][j], 'o')
-      plt.show()
+          plt.plot(index, result[i][j], 'o', line)
+      #plt.show()
     '''
     simple = get_simple_result(result)
     index = range(1, lens+1) * groups * times

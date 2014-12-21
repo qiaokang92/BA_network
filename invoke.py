@@ -68,6 +68,11 @@ def parse_options():
                                type = "string",
                                help = "in, out, or all")
 
+    parser.add_option("-a", "--action", dest="action",
+                               action = "store",
+                               default = "no",
+                               help = "no, info, no+info")
+
     (options, args) = parser.parse_args()
    
     #print options.bank_number
@@ -107,11 +112,44 @@ def parse_options():
 def get_c_list(n, lamuta):
     return n * [lamuta]
 
+def one_loop(myBA, ST, myG, m_list, kind):
+    #myG = multidi_to_graph(myBA)
+    #add_edges(myG, 4, 12)
+    #print 'build myG finish'
+    for i in myG.nodes():
+        #myG.node[i]['neibor'] = get_neighbor_nodes(myG, i)
+        myG.node[i]['ndn'] = 0
+    #print get_nodes_attr(myG) 
+    attack_num = len(m_list) 
+    last_c = get_nodes_attr_c(myBA, 3)
+    for i in range(1000):
+      if i == 0:
+        set_nodes_S(myBA, m_list)
+      else:
+        update_nodes_S(myBA,ST)
+      update_nodes_status(myBA, myG)
+      update_impact_between_nodes(myBA,ST)
+      if kind:
+        update_nodes_c(myBA, myG)
+      #print get_nodes_attr(myG) 
+      
+      this_c = get_nodes_attr_c(myBA, 3)
+      if (this_c == last_c):
+        #print this_c
+        print '%d attack looped %d times' % (attack_num, i)
+        break
+      last_c = this_c
+    
+    default_num = get_default_num(myBA)
+    return default_num
 
-def one_loop(myBA, ST, m_list):
-
-    last_c = get_nodes_attr_c(myBA)
-
+def another_loop(myBA, ST, m_list):
+    myG = multidi_to_graph(myBA)
+    add_edges(myG, 4, 12)
+    
+    #print get_nodes_attr(myG) 
+    
+    last_c = get_nodes_attr_c(myBA, 3)
     for i in range(1000):
       if i == 0:
         set_nodes_S(myBA, m_list)
@@ -119,8 +157,9 @@ def one_loop(myBA, ST, m_list):
         update_nodes_S(myBA,ST)
       update_nodes_status(myBA)
       update_impact_between_nodes(myBA,ST)
+      #update_nodes_c(myBA, myG)
       
-      this_c = get_nodes_attr_c(myBA)
+      this_c = get_nodes_attr_c(myBA, 3)
       if (this_c == last_c):
         #print this_c
         break
