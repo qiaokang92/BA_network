@@ -38,7 +38,7 @@ def parse_options():
     parser.add_option("-t","--random-times",dest = 'random_times',
                                  action = 'store',
                                  type = 'int',
-                                 default = '20',
+                                 default = '1',
                         help = 'in random mode, repeat times for a single network')
 
     parser.add_option( "-f","--figure-kind", dest = 'figure_kind',
@@ -61,7 +61,7 @@ def parse_options():
     parser.add_option("-M","--attack-mode", dest = "mode",
                                 action = 'store',
                                 type = 'string',
-                                help = 't, p or r')
+                                help = 'test, purpose or random')
 
     parser.add_option("-d", "--degree", dest = "degree",
                                action = "store",
@@ -87,19 +87,6 @@ def parse_options():
     if not options.mode:
       parser.error('attack mode unknown!')
     
-    '''
-    if not options.step:
-      print >> sys.stderr, 'WARNING : step number is not given, set as 1'      
-      options.step = 1
- 
-    if not options.lamuta:
-      print >> sys.stderr, 'WARNING : lamuta is not given, set as 0.06'
-      options.lamuta = 0.06
-
-    #c_list  = n * [lamuta]
-    #s_init_list = n * [0]
-    '''
-
     print 'Total number is: %d' % (options.bank_number)
     print 'Every step is: %d' % (options.step)
     print 'Banks will be attacked: %d' % (options.attack_number)
@@ -107,41 +94,8 @@ def parse_options():
 
     return options, args
 
-    # do_attack(n, n0, m, c_list, s_init_list, mode, degree)
-    
 def get_c_list(n, lamuta):
     return n * [lamuta]
-
-def one_loop(myBA, ST, myG, m_list, kind):
-    #myG = multidi_to_graph(myBA)
-    #add_edges(myG, 4, 12)
-    #print 'build myG finish'
-    for i in myG.nodes():
-        #myG.node[i]['neibor'] = get_neighbor_nodes(myG, i)
-        myG.node[i]['ndn'] = 0
-    #print get_nodes_attr(myG) 
-    attack_num = len(m_list) 
-    last_c = get_nodes_attr_c(myBA, 3)
-    for i in range(1000):
-      if i == 0:
-        set_nodes_S(myBA, m_list)
-      else:
-        update_nodes_S(myBA,ST)
-      update_nodes_status(myBA, myG)
-      update_impact_between_nodes(myBA,ST)
-      if kind:
-        update_nodes_c(myBA, myG)
-      #print get_nodes_attr(myG) 
-      
-      this_c = get_nodes_attr_c(myBA, 3)
-      if (this_c == last_c):
-        #print this_c
-        print '%d attack looped %d times' % (attack_num, i)
-        break
-      last_c = this_c
-    
-    default_num = get_default_num(myBA)
-    return default_num
 
 def another_loop(myBA, ST, m_list):
     myG = multidi_to_graph(myBA)

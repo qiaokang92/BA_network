@@ -287,10 +287,6 @@ def init_ST(ST):
     init_impact_between_nodes(ST)
     return ST
 
-def get_random_list(n,m):
-    n_list = range(0,n)
-    m_list =  random.sample(n_list,m)
-    return m_list
 
 def get_max_degree_nodes(G, m):
     degree_list = []

@@ -4,19 +4,7 @@ import cPickle
 import main
 from invoke import *
 from static_struct import *
-
-def init_purpose_list(G, m, degree):
-    n = G.number_of_nodes()
-    if degree == 'all':
-      #return get_random_list(n,m)
-      return get_max_degree_nodes(G, m)
-    elif degree == 'in':
-      return get_max_indegree_nodes(G, m)
-    elif degree == 'out':
-      return get_max_outdegree_nodes(G, m)
-    else:
-      print 'error: wrong degree type!'
-      sys.exit(2)
+from purpose_invoke import *
 
 def do_one_purpose_attack(opts):
     result = []
@@ -59,8 +47,6 @@ def do_purpose_attack(opts):
     
     draw_figure(all_result, figure_kind)
     return all_result
-    #fd = open('./purpose_result', 'w')
-    #fd.write(str(all_result))
 
 def get_average_list(result):
     groups = len(result)
