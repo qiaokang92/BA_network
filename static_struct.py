@@ -196,8 +196,12 @@ def update_nodes_c(BA,g):
 
 def get_node_rho(g, node):
     neibor_num = len(g.node[node]['neibor'])
+    print 'has %d neibors' % (neibor_num)
+
     nndn = float(neibor_num - g.node[node]['ndn'])
-    #nndn = float(g.node[node]['ndn'])
+    print 'default %d in neibors' % (g.node[node]['ndn'])
+    
+    print  nndn / neibor_num
     return nndn / neibor_num
 
 def update_impact_between_nodes(G,ST):
@@ -375,6 +379,7 @@ def get_nodes_in_degree(G):
 
 #convert a mutidigraph to a undirected graph (with no parallel edges)
 def multidi_to_graph(G):
+    '''
     edges = G.edges()
     for one in edges:
         rev = (one[1],one[0])
@@ -383,6 +388,9 @@ def multidi_to_graph(G):
     edges = list(set(edges))
     G1 = nx.Graph()
     G1.add_edges_from(edges)
+    '''
+    G1 = nx.MultiGraph()
+    G1.add_edges_from(G.edges())
     return G1
 
 def get_neighbor_nodes(G, node):
@@ -392,10 +400,10 @@ def get_neighbor_nodes(G, node):
             result.append(i[1])
         elif node == i[1]:
             result.append(i[0])
-    return result
+    return list(set(result))
 
 # G is an undirected graph, add its nodes until its average degree comes to d 
-def add_edges(G, m, d):
+def add_graph_edges(G, m, d):
     if d >= G.number_of_nodes():
         print 'unreachable degree given!'
         sys.exit(1)
@@ -414,13 +422,18 @@ def add_edges(G, m, d):
         if source == n:
             source = 0
         neibor = get_neighbor_nodes(G, source)
-        exclude = neibor.append(source)
+        #exclude = neibor.append(source)
         new = repeated[:]
-        
+
+        while(source in new):
+            new.remove(source)
+
+        ''' 
         for i in neibor:
             while(i in new):
                 new.remove(i)
-                
+        '''
+
         flag = False
         if len(set(new)) <= m:
             #print 'this node is too big!'
@@ -449,7 +462,7 @@ def add_edges(G, m, d):
 
 def build_myG(myBA, n0, d):
     myG = multidi_to_graph(myBA)
-    add_edges(myG, n0, d)
+    add_graph_edges(myG, n0, d)
     
     for i in myG.nodes():
         myG.node[i]['neibor'] = get_neighbor_nodes(myG, i)
@@ -470,7 +483,7 @@ if __name__ == '__main__':
     #print G1.edges()
     print 'average degree is %d' % (get_average_degree(G1))
 
-    add_edges(G1, 4, 15)
+    add_graph_edges(G1, 4, 13)
     print 'number of edges of G is %d' % (G1.number_of_edges())
     #print G1.edges()
     print 'average degree is %d' % (get_average_degree(G1))

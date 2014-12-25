@@ -35,15 +35,21 @@ def do_attack(opts):
 
     for i in range(1, num_graph + 1):
         print '\nThe %dth graph will be established' % (i)
+        
         myBA, ST, myG = gen_graphs(opts)
+        
         if opts.action == 'no':
             all_result1.append(do_one_attack(myBA, ST, myG, opts, False))
         elif opts.action =='info':
             all_result1.append(do_one_attack(myBA, ST, myG, opts, True))
         elif opts.action == 'no+info':
+            print '\nattack without information level'
             all_result1.append(do_one_attack(myBA, ST, myG, opts, False))
+            print '\nattack with information level'
             all_result2.append(do_one_attack(myBA, ST, myG, opts, True))
-
+        else:
+            print 'error action type'
+            sys.exit(3)
     data = [all_result1, all_result2]
     #save_data(data)
     gen_figure(data, figure_kind)

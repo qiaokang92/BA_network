@@ -33,10 +33,3 @@ def do_one_attack(myBA, ST, myG, opts, kind):
         one_result.append(result)
         #print one_result
     return one_result
-
-if  __name__ == '__main__':
-    test.parse_para()
-    do_random_attack()
-
-
-
