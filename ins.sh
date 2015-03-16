@@ -13,4 +13,4 @@ python main.py -n $N -i 4 -m $M -t $T -M random -f single_line -a no+info --txt=
 python main.py -n $N -i 4 -m $M -t $T -M random -f single_line -a no+info --txt=4 --lamuta=0.04
 python main.py -n $N -i 4 -m $M -t $T -M random -f single_line -a no+info --txt=8 --lamuta=0.08
 
-python draw.py
+python draw_figures.py
