@@ -1,4 +1,5 @@
 from optparse import OptionParser
+import pickle
 import signal
 import sys
 import time
@@ -75,6 +76,16 @@ def parse_options():
                                default = "no",
                                help = "no, info, no+info")
 
+    parser.add_option("--data", dest="data_path",
+                               action="store",
+                               type="string",
+                               default="./result/data.pkl")
+
+    parser.add_option("--txt", dest="txt_path",
+                                action = 'store',
+                                type = 'string',
+                                default = '')
+
     (options, args) = parser.parse_args()
    
     #print options.bank_number
@@ -99,7 +110,7 @@ def parse_options():
 def gen_figure(data, figure_kind):
     for i in data:
       if len(i) != 0:
-        draw_figure(i, figure_kind, '-')
+        draw_figure(i, figure_kind, 'o-')
     plt.show()
 
 def draw_figure(result, kind, line):
@@ -155,3 +166,58 @@ def get_average_list_2(result):
             total += result[j][i]
         num.append(total / groups)
     return num
+
+def sava_data(all_data, path):
+    output = open(path, 'wb')
+    pickle.dump(output, all_data)
+    output.close()
+
+def get_simple_result(result):
+    ave1 = get_average_list_1(result)
+    ave = get_average_list_2(ave1)
+    return ave
+
+def write_data_2_txt(fname, all_data):
+    data1 = all_data[0][0]
+    data2 = all_data[0][1]
+
+    times1 = all_data[1][0]
+    times2 = all_data[1][1]
+
+    result_txt1 = './result/' + fname + '_result_no_info.txt'
+    result_txt2 = './result/' + fname + '_result_with_info.txt'
+    time_txt1 = './result/' + fname + '_time_no_info.txt'
+    time_txt2 = './result/' + fname + '_time_with_info.txt'
+    
+    ave_result1 = get_simple_result(data1)
+    ave_result2 = get_simple_result(data2)
+    ave_times1 = get_simple_result(times1)
+    ave_times2 = get_simple_result(times2)
+    
+    write_one_data_2_txt(result_txt1, ave_result1)
+    write_one_data_2_txt(result_txt2, ave_result2)
+    write_one_data_2_txt(time_txt1, ave_times1)
+    write_one_data_2_txt(time_txt2, ave_times2)
+
+def write_one_data_2_txt(path, data):
+    f = open(path , 'w') 
+    for i in data:
+        f.write(str(i))
+        f.write(' ')
+    f.close()
+
+def save_data(path, all_data):
+    data1 = all_data[0][0]
+    data2 = all_data[0][1]
+
+    #times1 = all_data[1][0]
+    #times2 = all_data[1][1]
+
+    output = open(path, 'a')
+
+    ave_result1 = get_simple_result(data1)
+    ave_result2 = get_simple_result(data2)
+    
+    pickle.dump(ave_result1, output)
+    pickle.dump(ave_result2, output)
+

@@ -66,6 +66,6 @@ def one_loop(myBA, ST, myG, m_list, kind):
       last_c = this_c
     
     default_num = get_default_num(myBA)
-    return default_num
+    return default_num , i
 
 

@@ -8,6 +8,7 @@ from purpose_invoke import *
 
 def do_one_purpose_attack(opts):
     result = []
+    times = []
 
     n = opts.bank_number
     n0 = opts.step
@@ -28,13 +29,16 @@ def do_one_purpose_attack(opts):
       myBA = init_myBA(myBA, c_list, s_init_list)
       ST = init_ST(ST)
       
-      num = one_loop(myBA, ST, m_list)
+      num , time = one_loop(myBA, ST, m_list)
       result.append(num)
+      times.append(time)
       print '%d purpose attack in %d banks caused %d default banks' % (i,n, num)
-    return result
+      print 'looped %d times' % (time)
+    return result, times
 
 def do_purpose_attack(opts):
     all_result = []
+    all_times = []
     num_graph = opts.num_graph
     figure_kind = opts.figure_kind
     m = opts.attack_number
@@ -42,9 +46,12 @@ def do_purpose_attack(opts):
     print '\n%d graphs will be established in total' % (num_graph)
     for i in range(1,num_graph + 1):
       print '\n%dst graph established' % (i)
-      all_result.append(do_one_purpose_attack(opts))
+      r = do_one_purpose_attack(opts)
+      t = do_one_purpose_attack(opts)
+      all_result.append(r)
+      all_result.append(t)
     print all_result
-    
+   
     draw_figure(all_result, figure_kind)
     return all_result
 

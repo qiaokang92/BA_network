@@ -11,12 +11,15 @@ def do_one_attack(myBA, ST, myG, opts, kind):
     t = opts.random_times
     mode = opts.mode 
     result = []
+    times = []
     one_result = []
+    one_time = []
     degree = opts.degree
 
     print '%d times attack will be executed' % (t)
     for i in range(1, t+1):
         result = []
+        times = []
         print '\nThis is %dth attack' % (i) 
         print 'we will attack from 1 to %d banks\n' % (m)
         for j in range(1, m+1):
@@ -26,10 +29,12 @@ def do_one_attack(myBA, ST, myG, opts, kind):
                 m_list = get_purpose_list(myBA, j, degree) 
             print m_list
             init_graphs(opts, myBA, ST, myG)
-            num = one_loop(myBA, ST, myG, m_list, kind)
+            num, time = one_loop(myBA, ST, myG, m_list, kind)
             print '%d %s attack in %d banks caused %d default banks' % (j,mode,n,num)
             result.append(num)
+            times.append(time)
             #print result
         one_result.append(result)
+        one_time.append(times)
         #print one_result
-    return one_result
+    return one_result, one_time
