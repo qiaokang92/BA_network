@@ -53,7 +53,7 @@ def parse_options():
     parser.add_option( "--lamuta", dest = "lamuta",
                                 type = "float",
                                 action = 'store',
-                                default = 0.06,
+                                default = 0.03,
                          help = 'Banks\' initial property')
 
     parser.add_option("--loop", dest = "max_loop",
@@ -86,11 +86,40 @@ def parse_options():
                                 type = 'string',
                                 default = '')
 
+    parser.add_option("--graph", dest="graph_path",
+                               action="store",
+                               type="string",
+                               default="./result/graph.pkl")
+    
+    parser.add_option("--alpha", dest='alpha',
+                                action='store',
+                                type='float',
+                                default = 0.1)
+
+    parser.add_option("--kind", dest='kind',
+                                action='store',
+                                type='int',
+                                default=1)
+
+    parser.add_option("--same", dest='same',
+                                action='store',
+                                type='int',
+                                default=0)
+
+    parser.add_option("--list", dest='l_path',
+                                action='store',
+                                type='string' )
+    
+    parser.add_option("--add", dest='add',
+                                action='store',
+                                type='int',
+                                default=0)
+
     (options, args) = parser.parse_args()
    
     #print options.bank_number
     #print type(options.bank_number)
-
+    '''
     if not options.bank_number:
       parser.error('total number of banks is not given')
     
@@ -99,11 +128,11 @@ def parse_options():
 
     if not options.mode:
       parser.error('attack mode unknown!')
-    
+    '''
     print 'Total number is: %d' % (options.bank_number)
     print 'Every step is: %d' % (options.step)
-    print 'Banks will be attacked: %d' % (options.attack_number)
-    print 'Attack mode: %s' % (options.mode)
+    #print 'Banks will be attacked: %d' % (options.attack_number)
+    #print 'Attack mode: %s' % (options.mode)
 
     return options, args
 
@@ -207,17 +236,15 @@ def write_one_data_2_txt(path, data):
     f.close()
 
 def save_data(path, all_data):
-    data1 = all_data[0][0]
-    data2 = all_data[0][1]
+    all_result = all_data[0]
 
-    #times1 = all_data[1][0]
-    #times2 = all_data[1][1]
+    all_times = all_data[1]
 
     output = open(path, 'a')
 
-    ave_result1 = get_simple_result(data1)
-    ave_result2 = get_simple_result(data2)
+    ave_result = get_simple_result(all_result)
+    ave_times = get_simple_result(all_times)
     
-    pickle.dump(ave_result1, output)
-    pickle.dump(ave_result2, output)
+    pickle.dump(ave_result, output)
+    pickle.dump(ave_times, output)
 

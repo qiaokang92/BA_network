@@ -1,7 +1,6 @@
 import matplotlib.pyplot as plt
 import main
 from static_struct import *
-#from invoke import *
 
 def get_c_list(n,lamuta):
     return n * [lamuta]
@@ -12,7 +11,7 @@ def gen_graphs(opts):
 
     myBA = build_myBA(n, n0)
     ST = build_ST(n)
-    myG = build_myG(myBA, n0, 15)
+    myG = build_myG(myBA, n0, 25)
     print '\nNew graph established, number of nodes: %d' % (n)
     print 'Average degree: %d' % (get_average_degree(myBA))
     return myBA, ST, myG
@@ -44,24 +43,27 @@ def get_random_list(n,m):
     m_list =  random.sample(n_list,m)
     return m_list
 
-def one_loop(myBA, ST, myG, m_list, kind):
+def one_loop(myBA, ST, myG, m_list, kind,alpha):
     attack_num = len(m_list) 
     last_c = get_nodes_attr_c(myBA, 3)
+    #print last_c
     for i in range(1000):
-      print '\nthis is loop %d\n' % (i)
+      #print '\nthis is loop %d\n' % (i)
       if i == 0:
         set_nodes_S(myBA, m_list)
       else:
         update_nodes_S(myBA,ST)
       update_nodes_status(myBA, myG)
-      print '%d default in this loop' % get_default_num(myBA)
+      #print '%d default in this loop' % get_default_num(myBA)
       update_impact_between_nodes(myBA,ST)
-      if kind:
-        update_nodes_c(myBA, myG)
-      
+      if kind == 2:
+        update_nodes_c2(myBA, myG, alpha)
+      elif kind == 3:
+        update_nodes_c3(myBA, myG, alpha)
+      #update_nodes_c(myBA, myG, alpha)
       this_c = get_nodes_attr_c(myBA, 3)
       if (this_c == last_c):
-        print '%d attack looped %d times' % (attack_num, i)
+        #print '%d attack looped %d times' % (attack_num, i)
         break
       last_c = this_c
     

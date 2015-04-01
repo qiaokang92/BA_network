@@ -19,7 +19,9 @@ if __name__ == "__main__":
     myBA, ST, myG = gen_graphs(opts)
     
     data = [myBA, ST, myG]
-    output = open("./result/graphs.pkl", 'wb')
+
+    g_path = opts.graph_path
+    output = open(g_path, 'wb')
     pickle.dump(data, output)
     output.close()
 

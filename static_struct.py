@@ -6,6 +6,7 @@ Author: Kang Qiao, BUAA
 Finsh Date: Oct, 25th, 2014
 '''
 
+from __future__ import division
 import random
 import networkx as nx
 from networkx.generators.classic import empty_graph, path_graph, complete_graph
@@ -184,25 +185,58 @@ def update_nodes_status(G, g):
         G.node[i]['status'] = 'Default'
         for j in g.node[i]['neibor']:
             g.node[j]['ndn'] += 1
-    
-def update_nodes_c(BA,g):
+
+def update_nodes_c3(BA,g,alpha):
     for i in g.nodes():
-        rho = get_node_rho(g, i)
+        old_rho = BA.node[i]['rho']
+        BA.node[i]['rho'] = get_node_rho(g, i)
+        rho = BA.node[i]['rho']
+        
+        old_ea = BA.node[i]['EA']
+        BA.node[i]['EA'] = BA.node[i]['EA'] * math.exp(-rho * rho)
+        ea= BA.node[i]['EA']
+
+        old_c=BA.node[i]['c']
+        
+        if old_c==0:
+            BA.node[i]['c'] = 0
+        elif rho==old_rho:
+            continue
+        elif ((old_c!=0) & (rho > old_rho)):
+            BA.node[i]['c'] -= (old_ea - ea) 
+            
+
+def update_nodes_c2(BA,g,alpha):
+    for i in g.nodes():
+        old_rho = BA.node[i]['rho']
+        BA.node[i]['rho'] = get_node_rho(g, i)
+        rho = BA.node[i]['rho']
+
+        old_ea = BA.node[i]['EA']
+        BA.node[i]['EA'] = BA.node[i]['EA'] * math.exp(-alpha * rho)
+        ea= BA.node[i]['EA']
+        
         old_c = BA.node[i]['c']
-        BA.node[i]['c'] *= math.exp((rho - 1) * 1) 
-        #if old_c != 0:
-            #print BA.node[i]['c'] / old_c
-        #print 'new c is %s' % (BA.node[i]['c'])
+        
+        if old_c==0:
+            BA.node[i]['c'] = 0
+        elif rho==old_rho:
+            continue
+            #print ea * (1 - math.exp(-alpha * rho)) 
+        elif ((old_c!=0) & (rho > old_rho)):
+            BA.node[i]['c'] -= (old_ea - ea) 
+            
 
 def get_node_rho(g, node):
     neibor_num = len(g.node[node]['neibor'])
-    print 'has %d neibors' % (neibor_num)
+    #print 'has %d neibors' % (neibor_num)
 
-    nndn = float(neibor_num - g.node[node]['ndn'])
-    print 'default %d in neibors' % (g.node[node]['ndn'])
+    #nndn = neibor_num - g.node[node]['ndn']
+    ndn = g.node[node]['ndn']
+    #print 'default %d in neibors' % (g.node[node]['ndn'])
     
-    print  nndn / neibor_num
-    return nndn / neibor_num
+    #print 'the rho is %s' % (str(ndn / neibor_num))
+    return ndn / neibor_num
 
 def update_impact_between_nodes(G,ST):
     #print 'update s'
@@ -277,9 +311,19 @@ def build_myBA(n,n0):
 def init_myBA(myBA, c_list, S_init_list):
     init_edges_attr_e(myBA)
     init_nodes_LB(myBA)
+    init_nodes_rho(myBA)
+    init_nodes_EA(myBA)
     init_nodes_CS(myBA,c_list,S_init_list) 
     init_nodes_status(myBA)
     return myBA
+
+def init_nodes_EA(myBA):
+    for i in myBA.nodes():
+        myBA.node[i]['EA'] = 0.8
+
+def init_nodes_rho(myBA):
+    for i in myBA.nodes():
+        myBA.node[i]['rho'] = 0
 
 # package function, to build a complete directed graph 
 # and initialize the 'shock' value of all edges in ST

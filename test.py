@@ -1,31 +1,26 @@
 from static_struct import *
 from invoke import *
+from gen_graph import *
+import sys
 
-def self_test(opts):
-    #derive needed options
-    n = opts.bank_number
-    n0 = opts.step
-    m = opts.attack_number
-    c_list = get_c_list(opts.bank_number, opts.lamuta )
-    s_init_list = n * [0]
-
-    myBA = build_myBA(n, n0)
-    myBA = init_myBA(myBA, c_list, s_init_list)
-    ST = build_ST(n) 
-    ST = init_ST(ST)
+g_path = sys.argv[1]
+m = int(sys.argv[2])
+def self_test():
+    myBA, ST, myG = get_graphs_from_file(g_path)
+    n = myBA.number_of_nodes()
     
+    c_list = n * [0.06]
+    s_init_list = n * [0]
+    
+    init_myBA(myBA, c_list, s_init_list)
+    init_ST(ST)
+    init_myG(myG)
+
     m_list = get_random_list(n, m)
     print 'These banks will be attacked: %s' % (str(m_list))
     
-    print 'Test finish, default banks: %d' % (one_loop(myBA, ST, m_list))
+    result, data = one_loop(myBA, ST, myG, m_list, 1, 0.01)
+    print 'Test finish, default banks: %d' % (result)
 
-    myBA = init_myBA(myBA, c_list, s_init_list)
-    ST = init_ST(ST)
-    print 'Test finish, default banks: %d' % (another_loop(myBA, ST, m_list))
-    
-    myBA = init_myBA(myBA, c_list, s_init_list)
-    ST = init_ST(ST)
-    print 'Test finish, default banks: %d' % (one_loop(myBA, ST, m_list))
-    #print 'Test finish, default banks: %d' % (one_loop(myBA, ST, m_list))
-
-
+if __name__ =='__main__':
+    self_test()

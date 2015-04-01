@@ -1,24 +1,36 @@
-import matplotlib.pyplot as plt
+from __future__ import division
 import pickle
+import matplotlib.pyplot as plt
+import sys
 
-r_path = './result/data.pkl'
+r_path = sys.argv[1]
+x = int(sys.argv[2])
+
+def draw_one_line(data, times, line, point):
+    lens = len(data)
+    index = range(1,lens+1)
+
+    plt.plot(index, data, line)
+    for i in range(lens):
+        plt.plot(index[i], data[i], point, alpha = times[i]/(max(times)))
+        #print times[i]/(max(times))
 
 if __name__ == "__main__":
     pkl = open(r_path, 'rb')  
-    data1 = pickle.load(pkl)
-    data2 = pickle.load(pkl)
-    data3 = pickle.load(pkl)
-    data4 = pickle.load(pkl)
-    data5 = pickle.load(pkl)
-    data6 = pickle.load(pkl)
-
-    lens = len(data1)
-    index = range(1,lens+1)
+    data = []
+    times = []
     
-    plt.plot(index, data1, 'bo-')
-    plt.plot(index, data2, 'bo--')
-    plt.plot(index, data3, 'ro-')
-    plt.plot(index, data4, 'ro--')
-    plt.plot(index, data5, 'go-')
-    plt.plot(index, data6, 'go--')
+    #for i in range(6):
+    for i in range(x):
+        data.append(pickle.load(pkl))
+        times.append(pickle.load(pkl))
+    
+    lens = len(data)
+    
+    line = ['g-','g--','b-','r--','k-','k--']
+    shape = ['rs', 'rs', 'rs'] * 2
+
+    for i in range(lens):
+        draw_one_line(data[i],times[i], line[i], shape[i])
+
     plt.show()
