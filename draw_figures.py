@@ -27,8 +27,8 @@ if __name__ == "__main__":
     
     lens = len(data)
     
-    line = ['g-','g--','b-','r--','k-','k--']
-    shape = ['rs', 'rs', 'rs'] * 2
+    line = ['g-','g--','b-','b--','k-','k--','r-','r--','y-','y--','c-','c--','m-','m--','g-','g--']
+    shape = ['rs', 'rs'] * 8
 
     for i in range(lens):
         draw_one_line(data[i],times[i], line[i], shape[i])

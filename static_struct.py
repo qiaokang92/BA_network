@@ -186,6 +186,30 @@ def update_nodes_status(G, g):
         for j in g.node[i]['neibor']:
             g.node[j]['ndn'] += 1
 
+def update_nodes_c4(BA,g,alpha):
+    for i in g.nodes():
+        old_rho = BA.node[i]['rho']
+        BA.node[i]['rho'] = get_node_rho2(g, i)
+        rho = BA.node[i]['rho']
+
+        old_ea = BA.node[i]['EA']
+        BA.node[i]['EA'] = BA.node[i]['EA'] * math.exp(-alpha * rho)
+        ea= BA.node[i]['EA']
+        
+        old_c = BA.node[i]['c']
+        
+        if old_c==0:
+            BA.node[i]['c'] = 0
+        elif rho==old_rho:
+            continue
+            #print ea * (1 - math.exp(-alpha * rho)) 
+        elif ((old_c!=0) & (rho > old_rho)):
+            BA.node[i]['c'] -= (old_ea - ea) 
+ 
+
+def get_node_rho2(ba):
+    return get_default_num(ba) / ba.number_of_nodes()
+ 
 def update_nodes_c3(BA,g,alpha):
     for i in g.nodes():
         old_rho = BA.node[i]['rho']

@@ -1,10 +1,11 @@
+import sys
 import matplotlib.pyplot as plt
 from invoke import *
 from gen_graph import *
 from static_struct import *
 import networkx as nx
 
-g_path = './result/graph50.pkl'
+g_path = sys.argv[1]
 
 def get_max_degree(G):
     return G.degree(get_max_degree_nodes(G,1)[0])

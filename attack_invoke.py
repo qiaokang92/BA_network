@@ -60,6 +60,8 @@ def one_loop(myBA, ST, myG, m_list, kind,alpha):
         update_nodes_c2(myBA, myG, alpha)
       elif kind == 3:
         update_nodes_c3(myBA, myG, alpha)
+      elif kind == 4:
+        update_nodes_c4(myBA,myG,alpha)
       #update_nodes_c(myBA, myG, alpha)
       this_c = get_nodes_attr_c(myBA, 3)
       if (this_c == last_c):

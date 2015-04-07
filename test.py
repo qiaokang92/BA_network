@@ -3,8 +3,6 @@ from invoke import *
 from gen_graph import *
 import sys
 
-g_path = sys.argv[1]
-m = int(sys.argv[2])
 def self_test():
     myBA, ST, myG = get_graphs_from_file(g_path)
     n = myBA.number_of_nodes()
@@ -24,3 +22,6 @@ def self_test():
 
 if __name__ =='__main__':
     self_test()
+
+    g_path = sys.argv[1]
+    m = int(sys.argv[2])
