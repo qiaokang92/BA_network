@@ -189,11 +189,11 @@ def update_nodes_status(G, g):
 def update_nodes_c4(BA,g,alpha):
     for i in g.nodes():
         old_rho = BA.node[i]['rho']
-        BA.node[i]['rho'] = get_node_rho2(g, i)
+        BA.node[i]['rho'] = get_node_rho2(BA)
         rho = BA.node[i]['rho']
 
         old_ea = BA.node[i]['EA']
-        BA.node[i]['EA'] = BA.node[i]['EA'] * math.exp(-alpha * rho)
+        BA.node[i]['EA'] = BA.node[i]['EA'] * math.exp(-0.05 * rho)
         ea= BA.node[i]['EA']
         
         old_c = BA.node[i]['c']
@@ -213,11 +213,11 @@ def get_node_rho2(ba):
 def update_nodes_c3(BA,g,alpha):
     for i in g.nodes():
         old_rho = BA.node[i]['rho']
-        BA.node[i]['rho'] = get_node_rho(g, i)
+        BA.node[i]['rho'] = get_node_rho2(BA)
         rho = BA.node[i]['rho']
         
         old_ea = BA.node[i]['EA']
-        BA.node[i]['EA'] = BA.node[i]['EA'] * math.exp(-rho * rho)
+        BA.node[i]['EA'] = BA.node[i]['EA'] * math.exp(-0.1 * rho)
         ea= BA.node[i]['EA']
 
         old_c=BA.node[i]['c']
