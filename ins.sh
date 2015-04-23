@@ -3,17 +3,21 @@
 #add=0, use random m_list, add=1, use add m_list
 #kind=1, no info level, kind=2, with info level
 
-N=100
+N=500
 M=30
-T=3
-lamuta=0.08
+T=30
+lamuta=0.05
 alpha=$lamuta
 #the lines in data file
 t=5
 
-GRAPH_PATH=./result/graph${N}-$t-$lamuta.pkl
-DATA_PATH=./result/data${N}-$t-$lamuta.pkl
-LIST_PATH=./result/list${N}-$t-$lamuta.pkl
+GRAPH_PATH=graphs/graph${N}-$t-$lamuta.pkl
+DATA_PATH=data/4-13/data${N}-$t-$lamuta.pkl
+LIST_PATH=lists/list${N}-$t-$lamuta.pkl
+
+echo 'sleeping...'
+sleep 10
+echo 'remove data'
 
 rm ${DATA_PATH}
 rm ${GRAPH_PATH}
