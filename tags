@@ -1,0 +1,16 @@
+Graph	draw_graphs.py	/^    G = nx.Graph()$/
+Workbook	gen_excel_from_G.py	/^    file1 = xlwt.Workbook()$/
+abs	get_mat.py	/^            cha += abs(X2[i][j] - X0[i][j])$/
+append	static_struct.py	/^      m_list.append(degree_list[i]['num'])$/
+build_myBA	attack_invoke.py	/^    myBA = build_myBA(n, n0)$/
+create_real_myBA	gen_real_graph.py	/^    myBA = create_real_myBA(opts.init_data_path, o/
+degree	draw_graphs.py	/^    return G.degree(get_max_degree_nodes(G,1)[0])$/
+edges	static_struct.py	/^    edges = G.edges()$/
+exit	invoke.py	/^    sys.exit(0)$/
+get_graphs_from_file	main.py	/^        myBA, ST, myG, kind_list = get_graphs_from/
+get_mat	get_graph_from_mat.py	/^    mat1 = get_mat(chaijie_path)$/
+int	attack.py	/^    same = int(opts.same)$/
+load	gen_graph.py	/^    data = pickle.load(g_file)$/
+local_my_BA_graph	static_struct.py	/^    return local_my_BA_graph(n,m)$/
+open_workbook	read_from_excel.py	/^        data = xlrd.open_workbook(excel_file)$/
+sample	gen_m_list.py	/^    return random.sample(kind_list[k-1], m)$/

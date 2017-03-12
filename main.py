@@ -9,6 +9,8 @@ from test import *
 from gen_graph import *
 
 def enter_attack(opts, args):
+    do_attack(opts)
+    '''
     if opts.mode == 'test':
         #print 'Mode: test'
         self_test(opts)
@@ -21,8 +23,9 @@ def enter_attack(opts, args):
     else:
        print 'error: wrong mode type!'
        sys.exit(1)
+    '''
 
-def do_attack(opts):
+def do_attack(opts):    
     data = []
     all_result = []
     all_times = []
@@ -33,21 +36,22 @@ def do_attack(opts):
     mode = opts.mode
     g_path = opts.graph_path
     r_path = opts.data_path
-    t_path = opts.txt_path
+    #t_path = opts.txt_path
 
-    print ('\n %d graphs will be tested') % (num_graph)
+    #print ('\n %d graphs will be tested') % (num_graph)
 
     for i in range(1, num_graph + 1):
-        print '\nThe %dth graph will be established' % (i)
-        myBA, ST, myG = get_graphs_from_file(g_path)
+        #print '\nThe %dth graph will be established' % (i)
+        myBA, ST, myG, kind_list = get_graphs_from_file(g_path)
         
-        r,t = do_one_attack(myBA, ST, myG, opts)
+        r,t = do_one_attack(myBA, ST, myG, opts, kind_list)
         all_result.append(r)
-        all_times.append(t)
+        #all_times.append(t)
         
-    all_data = [all_result, all_times]
+    #all_data = [all_result, all_times]
+    #print all_result
     
-    save_data(r_path, all_data)
+    save_data(r_path, all_result)
     
     #write_data_2_txt(t_path, all_data)
     #gen_figure(data, figure_kind)

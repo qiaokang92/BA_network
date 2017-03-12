@@ -10,9 +10,10 @@ import pickle
 
 def get_graphs_from_file(path):
     g_file = open(path, 'rb')
+    #print 'Parsing file %s, to read needed graphs and kind list!' % path
     data = pickle.load(g_file)
     g_file.close()
-    return data[0], data[1], data[2]
+    return data[0], data[1], data[2], data[3]
 
 if __name__ == "__main__":
     opts, args = parse_options()

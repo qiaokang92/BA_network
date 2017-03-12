@@ -4,6 +4,12 @@ import attack_invoke
 import pickle
 from static_struct import *
 
+def get_diff_list_from_kind(kind_list, k, m):
+    return random.sample(kind_list[k-1], m)
+    if k==0 or k>6:
+        print "wrong k_list argument!"
+        sys.exit(1)
+
 def gen_add_list(m):
     m_list = []
     a = range(1,m+1)

@@ -20,36 +20,41 @@ def parse_options():
     
     parser.add_option("-n", "--num-banks", dest = "bank_number",
                             type = "int",
-                            help = "The number of banks")
+                            help = "The number of banks",
+                            default = 170)
 
     parser.add_option("-i", dest = "step",
                             action = 'store',
                             type = 'int',
                help = "nodes connected every step, default is 1")
-   
+    
+
     parser.add_option("-m", dest = 'attack_number',
                             action = 'store',
                             type = 'int',
+                            default = 2,
           help = 'Once this option is given, m banks will be give a shock as 1')
 
+    
     parser.add_option("-g","--num-graph", dest = 'num_graph',
                                 action = 'store',
                                 type = 'int',
                                 default = 1,
                                 help = "how many BA networks do you want to test")
     
+
     parser.add_option("-t","--random-times",dest = 'random_times',
                                  action = 'store',
                                  type = 'int',
-                                 default = '1',
+                                 default = 1,
                         help = 'in random mode, repeat times for a single network')
-
+               
     parser.add_option( "-f","--figure-kind", dest = 'figure_kind',
                                  action = 'store',
                                  type = 'string',
                                  default = 'line',
                         help = 'figure types you want, can be line or points')
-    
+
     parser.add_option( "--lamuta", dest = "lamuta",
                                 type = "float",
                                 action = 'store',
@@ -59,16 +64,19 @@ def parse_options():
     parser.add_option("--loop", dest = "max_loop",
                                action = 'store',
                                type = 'int',
+                               default = 1000,
                          help = 'maximum times the loop does')
 
     parser.add_option("-M","--attack-mode", dest = "mode",
                                 action = 'store',
                                 type = 'string',
-                                help = 'test, purpose or random')
+                                default = 'kind_all',
+                                help = "test, purpose or random")
 
     parser.add_option("-d", "--degree", dest = "degree",
                                action = "store",
                                type = "string",
+                               default = 'in',
                                help = "in, out, or all")
 
     parser.add_option("-a", "--action", dest="action",
@@ -90,16 +98,31 @@ def parse_options():
                                action="store",
                                type="string",
                                default="./result/graph.pkl")
+
+    parser.add_option("--chaijie", dest="chaijie_path",
+                               action="store",
+                               type="string",
+                               default="./excel/chaijiemat_zhuan.xlsx")
+
+    parser.add_option("--gailv", dest="gailv_path",
+                               action="store",
+                               type="string",
+                               default="./excel/gailu_mat.xlsx")
+
+    parser.add_option("--init", dest="init_data_path",
+                               action="store",
+                               type="string",
+                               default="./excel/dynamic_data.xlsx")
     
     parser.add_option("--alpha", dest='alpha',
                                 action='store',
                                 type='float',
-                                default = 0.1)
+                                default = 1)
 
     parser.add_option("--kind", dest='kind',
                                 action='store',
                                 type='int',
-                                default=1)
+                                default=2)
 
     parser.add_option("--same", dest='same',
                                 action='store',
@@ -113,6 +136,16 @@ def parse_options():
     parser.add_option("--add", dest='add',
                                 action='store',
                                 type='int',
+                                default=0)
+
+    parser.add_option("--k", dest='k',
+                                action='store',
+                                type='int',
+                                default=2)
+
+    parser.add_option("--beita", dest='beita',
+                                action='store',
+                                type='float',
                                 default=0)
 
     (options, args) = parser.parse_args()
@@ -129,8 +162,8 @@ def parse_options():
     if not options.mode:
       parser.error('attack mode unknown!')
     '''
-    print 'Total number is: %d' % (options.bank_number)
-    print 'Every step is: %d' % (options.step)
+    #print 'Total number is: %d' % (options.bank_number)
+    #print 'Every step is: %d' % (options.step)
     #print 'Banks will be attacked: %d' % (options.attack_number)
     #print 'Attack mode: %s' % (options.mode)
 
@@ -235,16 +268,16 @@ def write_one_data_2_txt(path, data):
         f.write(' ')
     f.close()
 
-def save_data(path, all_data):
-    all_result = all_data[0]
+def save_data(path, all_result):
+    #all_result = all_data[0]
 
-    all_times = all_data[1]
+    #all_times = all_data[1]
 
     output = open(path, 'a')
 
-    ave_result = get_simple_result(all_result)
-    ave_times = get_simple_result(all_times)
+    #ave_result = get_simple_result(all_result)
+    #ave_times = get_simple_result(all_times)
     
-    pickle.dump(ave_result, output)
-    pickle.dump(ave_times, output)
+    pickle.dump(all_result, output)
+    #pickle.dump(ave_times, output)
 

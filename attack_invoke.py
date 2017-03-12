@@ -43,30 +43,43 @@ def get_random_list(n,m):
     m_list =  random.sample(n_list,m)
     return m_list
 
-def one_loop(myBA, ST, myG, m_list, kind,alpha):
+def one_loop(myBA, ST, myG, m_list, kind, alpha, beita):
     attack_num = len(m_list) 
-    last_c = get_nodes_attr_c(myBA, 3)
+    last_c = get_nodes_attr_c(myBA, 0)
+    jumpout = 0
     #print last_c
-    for i in range(1000):
+    for i in range(100):
       #print '\nthis is loop %d\n' % (i)
       if i == 0:
-        set_nodes_S(myBA, m_list)
+        set_nodes_S(myBA, m_list, beita)
       else:
         update_nodes_S(myBA,ST)
+
+      #print 'Will calculate s for next generation'      
+      update_impact_between_nodes2(myBA,ST)
+      
+      #print 'Will update status'
       update_nodes_status(myBA, myG)
+
+      #print 'Enter information level'
+      update_nodes_c2(myBA, myG, alpha)
+
+      #print 'Will get c'
+      this_c = get_nodes_attr_c(myBA, 0)
+
       #print '%d default in this loop' % get_default_num(myBA)
-      update_impact_between_nodes(myBA,ST)
-      if kind == 2:
-        update_nodes_c2(myBA, myG, alpha)
-      elif kind == 3:
-        update_nodes_c3(myBA, myG, alpha)
-      elif kind == 4:
-        update_nodes_c4(myBA,myG,alpha)
-      #update_nodes_c(myBA, myG, alpha)
-      this_c = get_nodes_attr_c(myBA, 3)
-      if (this_c == last_c):
-        #print '%d attack looped %d times' % (attack_num, i)
+
+      if(jumpout == 1):
+        jumpout = 0
         break
+
+      if (this_c == last_c):
+        #print this_c
+        #print last_c
+        #print '\nC equals, %d attack looped %d times' % (attack_num, i)
+        jumpout = 1
+        #break
+
       last_c = this_c
     
     default_num = get_default_num(myBA)

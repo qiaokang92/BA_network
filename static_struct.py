@@ -13,6 +13,8 @@ from networkx.generators.classic import empty_graph, path_graph, complete_graph
 import math
 import itertools
 import sys
+from read_from_excel import *
+from get_graph_from_mat import *
 
 '''
 build a BA network, with n nodes and each step connet m nodes
@@ -122,7 +124,7 @@ def get_nodes_attr_c(G, precise):
     result = []
     for i in G.nodes():
       show = G.node[i]
-      result.append(round(show['c'], precise))
+      result.append(show['c'])
     return result
 
 # init the 'e' value of all edges in G 
@@ -154,9 +156,9 @@ def init_nodes_LB(G):
 #  receive 2 lists, each has n elements, like [0.6, 0.7, ...]
 def init_nodes_CS(G,c,s):
     for i in G.nodes():
-      G.node[i]['c'] = c[i]
+      G.node[i]['c'] = float(c[i])
       #print i 
-      G.node[i]['S'] = s[i]
+      G.node[i]['S'] = float(s[i])
       #print i
 
 # init the 'statue' value as 'Stable' of all nodes in G
@@ -183,6 +185,8 @@ def update_nodes_status(G, g):
       elif (c != 0) & (c <= S):
         G.node[i]['c'] = 0
         G.node[i]['status'] = 'Default'
+        #print i
+        #print g.node[i]['neibor']
         for j in g.node[i]['neibor']:
             g.node[j]['ndn'] += 1
 
@@ -248,7 +252,13 @@ def update_nodes_c2(BA,g,alpha):
             continue
             #print ea * (1 - math.exp(-alpha * rho)) 
         elif ((old_c!=0) & (rho > old_rho)):
+            #print 'level 2 start'
+            #print 'rho is %f' % rho
+            #print 'last c is %f' % BA.node[i]['c']
             BA.node[i]['c'] -= (old_ea - ea) 
+            if BA.node[i]['c'] < 0:
+              BA.node[i]['c'] = 0
+            #print 'new c is %f' % BA.node[i]['c']
             
 
 def get_node_rho(g, node):
@@ -260,14 +270,17 @@ def get_node_rho(g, node):
     #print 'default %d in neibors' % (g.node[node]['ndn'])
     
     #print 'the rho is %s' % (str(ndn / neibor_num))
-    return ndn / neibor_num
+    if neibor_num != 0:
+      return ndn / neibor_num
+    else:
+      return 1
 
 def update_impact_between_nodes(G,ST):
     #print 'update s'
     for i in G.edges():
       #print i
-      first = i[1]
-      end = i[0]
+      first = i[1] #i
+      end = i[0]   #j
       last_c = G.node[first]['c']
       last_S = G.node[first]['S']
       last_B = G.node[first]['B']
@@ -280,28 +293,74 @@ def update_impact_between_nodes(G,ST):
       elif last_S - last_c >= last_B:
         ST.edge[first][end][0]['shock'] = last_E
       else:
-        ST.edge[first][end][0]['shock'] = (last_S - last_c) * last_E / 0.2
+        ST.edge[first][end][0]['shock'] = (last_S - last_c) * last_E / L
 # update the impact from i node to j node in G
 # by the change of status and 'c' value
 def update_impact_between_nodes2(G,ST):
-    for i in ST.edges():
+    counter = 0
+    qing = []
+    for i in G.edges():
+      #print len(G.edges())
+      #print 'The %d th loop' % counter
+      counter += 1
       first = i[0]
       end = i[1]
-      last_c = G.node[first]['c']
-      last_S = G.node[first]['S']
-      last_B = G.node[first]['B']
-      if (end,first) in G.edges():
-        last_E = G.edge[end][first][0]['e']
-      else:
-        last_E = 0
-      L = G.node[first]['L']
+      last_c = G.node[end]['c']
+      last_S = G.node[end]['S']
+      last_B = G.node[end]['B']
+      #if (end,first) in G.edges():
+      #  last_E = G.edge[end][first][0]['e']
+      #else:
+      #  last_E = 0
+      #L = G.node[first]['L']
+      #print 'Will calculate sum eki'
+      #L = sum_eki(G,i)
+      L = G.node[end]['sum']
+      #print type(L)
+      last_E = G.edge[first][end][0]['e']
+      q = 0
       if last_c > last_S:
-        ST.edge[first][end][0]['shock'] = 0
+        q = 1
+        qing.append(q)
+        ST.edge[end][first][0]['shock'] = 0
+        #print 'kind %d' % (q)
+        #print 'impact from %d to %d is set to %f' % (end, first, ST.edge[end][first][0]['shock'])
+        continue
       elif last_S - last_c >= last_B:
-        ST.edge[first][end][0]['shock'] = last_E
+        q = 2
+        #print 'kind %d' % (q)
+        qing.append(q)
+        ST.edge[end][first][0]['shock'] = last_E
+        #print 'impact from %d to %d is set to %f' % (end, first, ST.edge[end][first][0]['shock'])
+        continue
       else:
-        ST.edge[first][end][0]['shock'] = (last_S - last_c) * last_E / L
-  
+        q = 3
+        #print 'kind %d' % (q)
+        qing.append(q)
+
+        #print 'q = 3 this time'
+        #print last_S
+        #print last_c
+        #print last_E
+        #print L
+        ST.edge[end][first][0]['shock'] = (last_S - last_c) * last_E / L
+        #print 'impact from %d to %d is set to %f' % (end, first, ST.edge[end][first][0]['shock'])
+        continue
+      
+      '''
+      if (ST.edge[end][first][0]['shock'] != 0):
+        print 'impact this time is :'
+        print ST.edge[end][first][0]['shock']
+      '''
+    #print qing
+
+def sum_eki(G, i):
+  sum = 0 
+  for j in G.nodes():
+    if (i,j) in G.edges():
+      sum += G.edge[i][j][0]['e']
+  return sum
+
 # calculate the 'S' value of all nodes in G
 # by the change of 's' value of edges in ST  
 def update_nodes_S(G,ST):
@@ -313,9 +372,13 @@ def update_nodes_S(G,ST):
 
 # set the 'S' value of node in G as 1
 # from the list 'm', which contains a list of banks
-def set_nodes_S(G,m):
+def set_nodes_S(G,m, beita):
     for i in m:
-      G.node[i]['S'] = 1
+      #print 'for node i = %d' % (i)
+      #print 'setting node S, TA = %f' % (G.node[i]['TA'])
+      #print 'the c of the node is %f' % (G.node[i]['c'])
+      G.node[i]['S'] = G.node[i]['TA'] * beita
+      #print 'the S of node %d is set to %f' % (i, G.node[i]['S'])
 
 # after loops, calculate the number of default banks.
 def get_default_num(G):
@@ -331,6 +394,116 @@ def get_default_num(G):
 def build_myBA(n,n0):
     myBA = build_network(n,n0)
     return myBA
+
+def init_real_lbea(G, l, b, ea):
+    for i in G.nodes():
+        G.node[i]['L'] = float(l[i])
+        G.node[i]['B'] = float(b[i])
+        G.node[i]['EA'] = float(ea[i])
+
+def init_real_myBA(myBA, init_path, chaijie_path):
+    n = myBA.number_of_nodes();
+    l_list, b_list, c_list, ea_list, TA_list = get_BA_data_from_excel(init_path, n)
+    S_init_list = [0] * n
+    #mat1 = get_mat(chaijie_path)
+
+    init_real_lbea(myBA, l_list, b_list, ea_list)
+    init_nodes_CS(myBA,c_list,S_init_list) 
+    init_nodes_status(myBA)
+    #init_edges_and_e(myBA, mat1)
+    init_nodes_rho(myBA)
+
+def init_real_myG(myG):
+    for i in myG.nodes():
+        #myG.node[i]['neibor'] = get_neighbor_nodes(myG, i)
+        myG.node[i]['ndn'] = 0
+
+def init_real_ST(ST):
+    init_impact_between_nodes(ST)
+
+def create_real_myG(myBA, gailv_path):
+    #print myBA.nodes()
+    myG = nx.Graph()
+    myG.add_nodes_from(range(0,170))
+    myG.add_edges_from(myBA.edges())
+    #print myG.nodes()
+
+    mat2 = get_mat(gailv_path)
+    add_edges_to_myG(myG, mat2, myBA.edges())
+
+    for i in myG.nodes():
+        myG.node[i]['neibor'] = get_neighbor_nodes(myG, i)
+        #print i
+        #print myG.node[i]['neibor']
+        myG.node[i]['ndn'] = 0
+
+    return myG
+
+def get_kind_list(init_path):
+    kind1_list = get_kind_ids(1, init_path)
+    kind2_list = get_kind_ids(2, init_path)
+    kind3_list = get_kind_ids(3, init_path)
+    kind4_list = get_kind_ids(4, init_path)
+    kind5_list = get_kind_ids(5, init_path)
+    kind6_list = get_kind_ids(6, init_path)
+
+    kind_list = [kind1_list, kind2_list, kind3_list, kind4_list, kind5_list, kind6_list]
+
+    return kind_list
+
+def init_nodes_sum(myBA, mat1):
+    for i in myBA.nodes():
+      myBA.node[i]['sum'] = col_sum(mat1, i)
+
+def col_sum(mat1, i):
+    ret = 0
+    for j in range(0, 170):
+      ret += float(mat1[j][i])
+    return ret
+
+
+def create_real_myBA(init_path, chaijie_path, n):
+    l_list, b_list, c_list, ea_list, TA_list = get_BA_data_from_excel(init_path, n)
+    print 'the l_list is'
+    print l_list
+    mat1 = get_mat(chaijie_path)
+
+    myBA = nx.MultiDiGraph()
+    myBA.add_nodes_from(range(0,n))
+    init_real_lbea(myBA, l_list, b_list, ea_list)
+    
+    S_init_list = [0] * n
+
+    init_nodes_CS(myBA,c_list,S_init_list) 
+    init_nodes_status(myBA)
+    init_edges_and_e(myBA, mat1)
+    init_nodes_rho(myBA)
+    init_nodes_TA(myBA, TA_list)
+    init_nodes_sum(myBA, mat1)
+
+    print 'created myBA'
+    print c_list
+    print TA_list
+
+    return myBA
+
+def init_nodes_TA(myBA, TA_list):
+  for i in myBA.nodes():
+    myBA.node[i]['TA'] = TA_list[i]
+
+
+def init_edges_and_e(G, mat1):
+    #mat = get_mat('./excel/chaijiemat_zhuan.xlsx')
+    #list1 = list2 = hand_list = []
+    #list1, list2, hand_list = get_graph_from_mat(G)
+    n = len(mat1)
+    for i in range(0,n):
+      for j in range(0,n):
+        if mat1[i][j] != 0:
+          #print "int mat1: (%d, %d)" % (i, j)
+          G.add_edge(i,j)
+          G[i][j][0]['e'] = float(mat1[i][j])
+
 
 def init_myBA(myBA, c_list, S_init_list):
     init_edges_attr_e(myBA)
@@ -359,6 +532,10 @@ def init_ST(ST):
     init_impact_between_nodes(ST)
     return ST
 
+def create_real_ST(n):
+    ST = nx.complete_graph(n, create_using = nx.MultiDiGraph())
+    init_impact_between_nodes(ST)
+    return ST
 
 def get_max_degree_nodes(G, m):
     degree_list = []
@@ -447,18 +624,19 @@ def get_nodes_in_degree(G):
 
 #convert a mutidigraph to a undirected graph (with no parallel edges)
 def multidi_to_graph(G):
-    '''
+    print 'here!'
     edges = G.edges()
+    print len(edges)
     for one in edges:
         rev = (one[1],one[0])
         if rev in edges:
             edges.remove(rev)
     edges = list(set(edges))
+    print len(edges)
     G1 = nx.Graph()
     G1.add_edges_from(edges)
-    '''
-    G1 = nx.MultiGraph()
-    G1.add_edges_from(G.edges())
+    #G1 = nx.MultiGraph()
+    #G1.add_edges_from(G.edges())
     return G1
 
 def get_neighbor_nodes(G, node):
